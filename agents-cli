@@ -1,0 +1,327 @@
+#!/usr/bin/env bash
+# agents-cli — Saturnodev Labs v2: pull/sync Markdown de roles de Cursor desde GitHub público.
+# version: 2.0.0
+# Origen: https://github.com/saturnodev/cursor-agents (rama por defecto: main).
+#
+# Usage:
+#   agents-cli <command> [options] [args]
+#   (instalaciones antiguas pueden invocar el binario como tmhus-agents)
+#
+# Commands:
+#   init                     Create .cursor/agents/ and agents.lock.yml in the project
+#   list  [--ref REF]        List all available roles in the remote repository
+#   pick  [--ref REF]        Interactive selector (fzf), then download and lock roles
+#   add   <path>... [--ref REF]
+#   remove <path>...
+#   sync  [--check]          Re-download lockfile roles (--check fails on drift)
+#   pin   <sha|branch>       Change lockfile ref and sync
+#   banner [--once|--no-anim|--loops N]
+#                            Print an animated martian banner with the CLI name
+#   version                  Print version and author
+#   help
+#
+# Globals:
+#   --ref REF                Override ref (default: lockfile ref or main)
+#   --dest DIR               Override destination (default: .cursor/agents)
+#   -V, --version            Print version and author
+#   -q, --quiet
+#   -h, --help
+#
+# Remote (GitHub API + raw.githubusercontent.com; repo público):
+#   SATURNODEV_GH_API    default https://api.github.com
+#   SATURNODEV_GH_OWNER  default saturnodev
+#   SATURNODEV_GH_REPO   default cursor-agents
+#   GITHUB_TOKEN         opcional: más límite de peticiones en api.github.com
+set -euo pipefail
+
+VERSION="2.0.0"
+AUTHOR="Saturnodev Labs <https://github.com/saturnodev>"
+
+GH_API="${SATURNODEV_GH_API:-https://api.github.com}"
+GH_OWNER="${SATURNODEV_GH_OWNER:-saturnodev}"
+GH_REPO="${SATURNODEV_GH_REPO:-cursor-agents}"
+DEFAULT_REF="main"
+RAW_BASE="https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}"
+DEST_DEFAULT=".cursor/agents"
+LOCK_NAME="agents.lock.yml"
+ME=$(basename "$0")
+
+c_red() { printf '\033[31m%s\033[0m' "$*"; }
+c_grn() { printf '\033[32m%s\033[0m' "$*"; }
+c_yel() { printf '\033[33m%s\033[0m' "$*"; }
+die()   { echo "$(c_red "x") $*" >&2; exit 1; }
+say()   { [ "${QUIET:-0}" = 1 ] || echo "$*"; }
+warn()  { echo "$(c_yel "!") $*" >&2; }
+
+need() { command -v "$1" >/dev/null || die "missing dependency: $1"; }
+need jq
+need curl
+
+# GET JSON from GitHub REST (optional Bearer for higher rate limits).
+gh_curl_json() {
+  local url="$1"
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    curl -sS -L --max-time 60 \
+      -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      "$url"
+  else
+    curl -sS -L --max-time 60 \
+      -H "Accept: application/vnd.github+json" \
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      "$url"
+  fi
+}
+
+# Download raw file at ref/path from raw.githubusercontent.com (public).
+gh_fetch_raw() {
+  local ref="$1" path="$2" outfile="$3"
+  local url="${RAW_BASE}/${ref}/${path}"
+  curl -sS -L --max-time 60 -f -o "$outfile" "$url" \
+    || die "failed to fetch ${url}"
+}
+
+lock_path()  { echo "${DEST}/${LOCK_NAME}"; }
+lock_ref()   { [ -f "$(lock_path)" ] && awk '/^ref:/{print $2; exit}' "$(lock_path)" || echo "$DEFAULT_REF"; }
+lock_roles() { [ -f "$(lock_path)" ] && awk '/^roles:/{f=1;next} f&&/^  - /{sub(/^  - /,"");print}' "$(lock_path)" || true; }
+
+lock_write() {
+  local ref="$1"; shift
+  mkdir -p "$DEST"
+  {
+    echo "source: https://github.com/${GH_OWNER}/${GH_REPO} (Saturnodev Labs v2)"
+    echo "ref: $ref"
+    echo "roles:"
+    if [ $# -gt 0 ]; then
+      printf '  - %s\n' "$@" | sort -u
+    fi
+  } > "$(lock_path)"
+}
+
+remote_list() {
+  local ref="$1" json url msg
+  url="${GH_API}/repos/${GH_OWNER}/${GH_REPO}/git/trees/${ref}?recursive=1"
+  json=$(gh_curl_json "$url") || die "GitHub request failed for tree ref=${ref}"
+  if ! echo "$json" | jq -e '.tree | type == "array"' >/dev/null 2>&1; then
+    msg=$(echo "$json" | jq -r '.message // "invalid response"')
+    die "GitHub tree failed for ref=${ref}: ${msg}"
+  fi
+  # Incluye .cursor/agents/*.md (roles en el repo); excluye el resto de .cursor/, docs/ y README sueltos.
+  echo "$json" | jq -r '.tree[] | select(.type=="blob") | .path' \
+    | grep -E '\.md$' \
+    | grep -vE '^(docs/|README\.md$|.*/README\.md$)' \
+    | awk '!/^\.cursor\// || /^\.cursor\/agents\//' || true
+}
+
+fetch_one() {
+  local path="$1" ref="$2" out="${DEST}/${1}"
+  mkdir -p "$(dirname "$out")"
+  gh_fetch_raw "$ref" "$path" "$out"
+  say "  $(c_grn OK) $out"
+}
+
+cmd_init() {
+  mkdir -p "$DEST"
+  [ -f "$(lock_path)" ] && die "already exists: $(lock_path)"
+  lock_write "${REF:-$DEFAULT_REF}"
+  say "$(c_grn OK) initialized $(lock_path)"
+}
+
+cmd_list() { remote_list "${REF:-$(lock_ref)}"; }
+
+cmd_pick() {
+  need fzf
+  local ref="${REF:-$(lock_ref)}" picked
+  picked=$(remote_list "$ref" | fzf -m --prompt="roles> " --height=80% --border) || exit 0
+  [ -z "$picked" ] && exit 0
+  while IFS= read -r p; do fetch_one "$p" "$ref"; done <<< "$picked"
+  local merged
+  merged=$(printf '%s\n%s\n' "$(lock_roles)" "$picked" | sort -u | sed '/^$/d')
+  # shellcheck disable=SC2086
+  lock_write "$ref" $merged
+}
+
+cmd_add() {
+  [ $# -gt 0 ] || die "usage: $ME add <path>..."
+  local ref="${REF:-$(lock_ref)}"
+  for p in "$@"; do fetch_one "$p" "$ref"; done
+  local merged
+  merged=$(printf '%s\n%s\n' "$(lock_roles)" "$(printf '%s\n' "$@")" | sort -u | sed '/^$/d')
+  # shellcheck disable=SC2086
+  lock_write "$ref" $merged
+}
+
+cmd_remove() {
+  [ $# -gt 0 ] || die "usage: $ME remove <path>..."
+  local kept ref
+  ref="$(lock_ref)"
+  kept=$(comm -23 <(lock_roles | sort -u) <(printf '%s\n' "$@" | sort -u))
+  for p in "$@"; do
+    [ -f "${DEST}/${p}" ] && rm -f "${DEST}/${p}" && say "  removed ${DEST}/${p}"
+  done
+  # shellcheck disable=SC2086
+  lock_write "$ref" $kept
+}
+
+cmd_sync() {
+  local check=0
+  [ "${1:-}" = "--check" ] && check=1
+  local ref
+  ref=$(lock_ref)
+  local tmp
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' EXIT
+  local n=0
+  while IFS= read -r p; do
+    [ -z "$p" ] && continue
+    n=$((n+1))
+    if [ $check -eq 1 ]; then
+      local ftmp="${tmp}/${p//\//__}"
+      gh_fetch_raw "$ref" "$p" "$ftmp"
+      diff -q "$ftmp" "${DEST}/${p}" >/dev/null 2>&1 \
+        || die "drift detected in $p (run '$ME sync')"
+    else
+      fetch_one "$p" "$ref"
+    fi
+  done < <(lock_roles)
+  [ $n -eq 0 ] && say "(empty lockfile - use '$ME pick' or '$ME add')"
+  [ $check -eq 1 ] && say "$(c_grn OK) lock aligned with $ref"
+}
+
+cmd_pin() {
+  local ref="${1:-}"
+  [ -z "$ref" ] && die "usage: $ME pin <sha|branch>"
+  local roles
+  roles=$(lock_roles)
+  # shellcheck disable=SC2086
+  lock_write "$ref" $roles
+  REF="$ref" cmd_sync
+}
+
+cmd_version() {
+  printf '%s v%s\n' "$ME" "$VERSION"
+  printf 'author: %s\n' "$AUTHOR"
+}
+
+# ── banner ──────────────────────────────────────────────────────────────────
+_banner_frames() {
+  local CYAN=$'\033[36m' GREEN=$'\033[32m' MAG=$'\033[35m' YEL=$'\033[33m'
+  local BOLD=$'\033[1m' DIM=$'\033[2m' RST=$'\033[0m'
+
+  STARS="${YEL}    .   *   .       .  *       .       *${RST}
+${YEL}   *      .       *      .   *      .${RST}"
+
+  ALIEN_LOW="${CYAN}              .--\"\"\"\"\"\"--.${RST}
+${CYAN}             /${GREEN}  o        o  ${CYAN}\\${RST}
+${CYAN}            |${GREEN}      \\__/      ${CYAN}|${RST}
+${CYAN}             '-..________..-'${RST}
+${MAG}        ___/===========|===========\\___${RST}
+${MAG}       |_____________________________|${RST}
+${YEL}              |    |    |    |${RST}
+${YEL}              |    |    |    |${RST}
+${YEL}              v    v    v    v${RST}"
+
+  ALIEN_BLINK="${CYAN}              .--\"\"\"\"\"\"--.${RST}
+${CYAN}             /${GREEN}  -        -  ${CYAN}\\${RST}
+${CYAN}            |${GREEN}      \\__/      ${CYAN}|${RST}
+${CYAN}             '-..________..-'${RST}
+${MAG}        ___/===========|===========\\___${RST}
+${MAG}       |_____________________________|${RST}
+${YEL}              :    :    :    :${RST}
+${YEL}              :    :    :    :${RST}
+${YEL}              .    .    .    .${RST}"
+
+  ALIEN_HIGH="
+${CYAN}              .--\"\"\"\"\"\"--.${RST}
+${CYAN}             /${GREEN}  o        o  ${CYAN}\\${RST}
+${CYAN}            |${GREEN}      \\__/      ${CYAN}|${RST}
+${CYAN}             '-..________..-'${RST}
+${MAG}        ___/===========|===========\\___${RST}
+${MAG}       |_____________________________|${RST}
+${YEL}              |    |    |    |${RST}
+${YEL}              v    v    v    v${RST}"
+
+  TITLE="
+${BOLD}${CYAN}    Saturnodev Labs · cursor-agents${RST}
+${BOLD}${MAG}    roles → .cursor/agents  ·  github.com/${GH_OWNER}/${GH_REPO}${RST}"
+
+  FOOTER="${DIM}              v${VERSION}  ·  ${AUTHOR}${RST}"
+}
+
+cmd_banner() {
+  local loops=4 once=0 noanim=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --once)     once=1; shift ;;
+      --no-anim)  noanim=1; shift ;;
+      --loops)    loops="$2"; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+
+  _banner_frames
+
+  # No animation when output is not a TTY (piped, captured, CI).
+  [ -t 1 ] || noanim=1
+
+  if [ "$noanim" = 1 ]; then
+    printf '%s\n%s\n\n%s\n\n%s\n\n' "$STARS" "$ALIEN_LOW" "$TITLE" "$FOOTER"
+    return 0
+  fi
+
+  [ "$once" = 1 ] && loops=1
+
+  tput civis 2>/dev/null || true
+  trap 'tput cnorm 2>/dev/null || true; printf "\033[?25h"; exit 0' INT TERM
+
+  local i=0
+  while [ "$i" -lt "$loops" ]; do
+    printf '\033[2J\033[H'
+    printf '%s\n%s\n' "$STARS" "$ALIEN_LOW"
+    sleep 0.30
+    printf '\033[2J\033[H'
+    printf '%s%s\n' "$STARS" "$ALIEN_HIGH"
+    sleep 0.20
+    printf '\033[2J\033[H'
+    printf '%s\n%s\n' "$STARS" "$ALIEN_BLINK"
+    sleep 0.20
+    printf '\033[2J\033[H'
+    printf '%s%s\n' "$STARS" "$ALIEN_HIGH"
+    sleep 0.20
+    i=$((i+1))
+  done
+
+  printf '\033[2J\033[H'
+  printf '%s\n%s\n%s\n\n%s\n\n' "$STARS" "$ALIEN_LOW" "$TITLE" "$FOOTER"
+
+  tput cnorm 2>/dev/null || true
+  trap - INT TERM
+}
+
+usage() {
+  awk '/^[^#]/{exit} NR>=2{sub(/^# ?/,""); print}' "$0"
+  printf '\nv%s · %s\n' "$VERSION" "$AUTHOR"
+}
+
+DEST="$DEST_DEFAULT"
+REF=""
+QUIET=0
+CMD=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --ref)         REF="$2"; shift 2 ;;
+    --dest)        DEST="$2"; shift 2 ;;
+    -q|--quiet)    QUIET=1; shift ;;
+    -V|--version)  CMD="version"; shift; break ;;
+    -h|--help)     usage; exit 0 ;;
+    init|list|pick|add|remove|sync|pin|banner|version|help) CMD="$1"; shift; break ;;
+    *) die "unknown command: $1 (use --help)" ;;
+  esac
+done
+
+[ -z "$CMD" ] && { usage; exit 1; }
+[ "$CMD" = "help" ] && { usage; exit 0; }
+
+cmd_"$CMD" "$@"
