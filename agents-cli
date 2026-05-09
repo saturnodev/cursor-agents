@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # agents-cli — Saturnodev Labs v2: pull/sync Markdown de roles de Cursor desde GitHub público.
-# version: 2.0.0
+# version: 2.0.1
 # Origen: https://github.com/saturnodev/cursor-agents (rama por defecto: main).
 #
 # Usage:
@@ -34,7 +34,7 @@
 #   GITHUB_TOKEN         opcional: más límite de peticiones en api.github.com
 set -euo pipefail
 
-VERSION="2.0.0"
+VERSION="2.0.1"
 AUTHOR="Saturnodev Labs <https://github.com/saturnodev>"
 
 GH_API="${SATURNODEV_GH_API:-https://api.github.com}"
@@ -171,7 +171,9 @@ cmd_sync() {
   ref=$(lock_ref)
   local tmp
   tmp=$(mktemp -d)
-  trap 'rm -rf "$tmp"' EXIT
+  # Expand path now: EXIT also runs when the function returns; a trap using "$tmp"
+  # would see an unset local under "set -u" after the function scope ends.
+  trap "rm -rf \"$tmp\"" EXIT
   local n=0
   while IFS= read -r p; do
     [ -z "$p" ] && continue
@@ -187,6 +189,8 @@ cmd_sync() {
   done < <(lock_roles)
   [ $n -eq 0 ] && say "(empty lockfile - use '$ME pick' or '$ME add')"
   [ $check -eq 1 ] && say "$(c_grn OK) lock aligned with $ref"
+  rm -rf "$tmp"
+  trap - EXIT
 }
 
 cmd_pin() {
