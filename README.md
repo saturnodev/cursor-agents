@@ -1,43 +1,60 @@
 # Saturnodev Labs — Plantillas de agentes (v2)
 
-**Versión (documentación): 2** (Saturnodev Labs — plantillas de agentes, **v2**). Este repositorio y sus `README` siguen la línea **v2**: alineación reciente (reglas Cursor canónicas en [architecture/software-architect.md](architecture/software-architect.md), política **doc-sync** antes de `git commit` descrita allí, cruces entre `README` por categoría, plantilla `.cursor/agents`, etc.).
+**Versión (documentación): 2** (Saturnodev Labs — plantillas de agentes, **v2**). Este repositorio y sus `README` siguen la línea **v2**: alineación reciente (reglas Cursor canónicas en [architecture/software-architect.md](architecture/software-architect.md), política **doc-sync** antes de `git commit` descrita allí, cruces entre `README` por categoría, herramientas [`agents-cli`](agents-cli) / [`install.sh`](install.sh) para volcar roles en `.cursor/agents/` del producto, etc.).
 
 Plantillas de **agentes** para **Cursor**, **Claude** (Code / *desktop*) y **GitHub Copilot** (Chat / *agent* según el producto). Misma intención de rol; la forma de usar el `*.md` (carpeta de agentes, *skills*, *custom instructions*) depende de cada herramienta.
 
 Repositorio de **plantillas de roles** para esas integraciones y equivalentes, que usa **Saturnodev Labs** para alinear criterio entre proyectos: mismos nombres de perfiles, mismos límites (qué toca y qué no) y documentación bajo la misma estructura por **categoría** (análisis, arquitectura, desarrollo, validación, gestión, DevOps).
 
-No es un framework ejecutable: son archivos **Markdown** con *frontmatter* y texto que el equipo **copia o versiona** en cada repositorio de producto según necesite.
+No es un framework ejecutable: son archivos **Markdown** con *frontmatter* y texto que el equipo **copia**, **sincroniza con [`agents-cli`](agents-cli)** o **versiona** en cada repositorio de producto según necesite.
 
 ## Mejoras en esta versión 2
 
 Cambios de línea **v2** que ya están reflejados en este repositorio (complementan el párrafo inicial sobre alineación):
 
 - **Reglas Cursor `saturnodev-labs-v2-doc-sync-on-commit.mdc` y `saturnodev-labs-v2-technical-manual.mdc`:** el cuerpo canónico vive en [architecture/software-architect.md](architecture/software-architect.md); en cada **repo de producto** se materializan bajo `.cursor/rules/` — **no** se versionan en **este** repositorio de plantillas. **Doc-sync** con **`alwaysApply: true`**: checklist **antes de cada** `git commit` autorizado sobre **`.architecture/`**, **`architecture-wiki/`**, **`docs/specs/story-*`**, **`docs/manual-tecnico.md`** cuando el cambio lo amerite. **Manual técnico** (globs en código): ver tabla de reglas en el rol del arquitecto.
-- **README coherentes:** los índices de **analysis**, **architecture**, **development**, **devops-iac**, **management**, **testing**, [`.cursor/agents`](.cursor/agents/README.md) y [`docs/wiki-tmp`](docs/wiki-tmp/README.md) declaran **Versión (documentación): 2** y enlazan al README raíz para misma línea documental.
+- **README coherentes:** los índices de **analysis**, **architecture**, **development**, **devops-iac**, **management**, **testing** y [`docs/wiki-tmp`](docs/wiki-tmp/README.md) declaran **Versión (documentación): 2** y enlazan al README raíz para misma línea documental. En el **repo de producto**, la carpeta **`.cursor/agents/`** (rellena con `agents-cli` o copia manual) cumple la convención Cursor descrita en [docs/wiki-tmp/Cursor-agentes.md](docs/wiki-tmp/Cursor-agentes.md).
 - **Tablas SDLC y workflow:** enlazan [fullstack-developer](development/fullstack-developer.md), *handoff* de fase 3 hacia **`.architecture/`**, `docs/specs/story-*.md`, **`.delivery-control/`** (dueño: [technical-leader](management/technical-leader.md)), **`.analyst/approved/`**, **`.pmo/*.md`** (PM) y criterios de *commit*/*push* en ese rol.
 - **Wiki / copia legible:** [`docs/wiki-tmp`](docs/wiki-tmp/README.md) concentra Markdown alineado al mismo modelo; en repos de producto **Saturnodev Labs v2** el espejo normativo de arquitectura vive bajo **`architecture-wiki/`** en la raíz del producto (ver [software-architect](architecture/software-architect.md)).
-- **`.cursor/rules` vs `.cursor/agents`:** la línea base de reglas para repos de producto está en [software-architect](architecture/software-architect.md); [`.cursor/agents/README.md`](.cursor/agents/README.md) documenta la plantilla Saturnodev Labs de agentes (v2) y aclara que la regla **doc-sync** no se guarda en este repositorio de plantillas.
-- **DevOps:** [devops-iac/README.md](devops-iac/README.md) enlaza `.architecture`, espejo wiki y la regla canónica / [fullstack-developer](development/fullstack-developer.md) en la misma política v2.
+- **`.cursor/rules` vs `.cursor/agents`:** la línea base de reglas para repos de producto está en [software-architect](architecture/software-architect.md). Uso de **agentes** en Cursor (rutas `@`, qué copiar): [docs/wiki-tmp/Cursor-agentes.md](docs/wiki-tmp/Cursor-agentes.md). La regla **doc-sync** canónica **no** se versiona en **este** repo de plantillas (se genera en cada app según ese rol).
+- **DevOps:** [devops-iac/README.md](devops-iac/README.md) enlaza **`.architecture/`**, espejo wiki y la regla canónica / [fullstack-developer](development/fullstack-developer.md) en la misma política v2.
 - **Plantillas por categoría:** cada carpeta expone `README.md` v2 y, donde aplica, `role-template.md` o roles ejemplo con convención de *frontmatter* y nombres **kebab-case** alineada al README raíz.
 - **QA y gestión:** roles bajo [testing/](testing/README.md) y [management/](management/README.md) quedan integrados en las tablas de fases (p. ej. fase 5, fase 7 / monitoreo) con enlaces cruzados desde este índice.
 
 ## Para qué sirve
 
-- **Estandarizar** cómo se describen los agentes (alcance, entregas, limitaciones, carpetas como `.architecture`, `.iac`, `.testing`, `.security`, `.analyst`, etc.).
+- **Estandarizar** cómo se describen los agentes (alcance, entregas, limitaciones, carpetas como **`.architecture/`**, **`.iac/`**, **`.testing/`**, **`.security/`**, **`.analyst/`**, etc.).
 - **Reutilizar** roles en varios repositorios de la organización sin reescribirlos desde cero.
-- **Evolución** con la organización: al cambiar una plantilla aquí, los equipos deciden qué difundir a sus productos (merge, cherry-pick, o copia manual de archivos concretos).
+- **Evolución** con la organización: al cambiar una plantilla aquí, los equipos deciden qué difundir a sus productos (*merge*, *cherry-pick*, copia manual o **`agents-cli sync`** contra el remoto / *lockfile*).
 
 Cada **categoría** tiene al menos un `README.md` y, donde aplica, una **plantilla base** en inglés (`role-template.md`) o un **rol de ejemplo** ya rellenado. **Plantilla canónica** para *roles* nuevos de entrega: [development/role-template.md](development/role-template.md). **Variante QA:** [testing/role-template.md](testing/role-template.md). Las carpetas *analysis*, *architecture*, *devops-iac* y *management* reutilizan la misma mecánica de *frontmatter* y sección *Scope* que en esa plantilla salvo que el `README` de la categoría indique lo contrario.
 
 | Carpeta | Uso resumido |
 |--------|----------------|
 | [analysis/](analysis/README.md) | Analistas funcionales, backlog, requisitos (bajo **`.analyst/`**, aprobación en **`.analyst/approved/`**) |
-| [architecture/](architecture/README.md) | Arquitectura y diseño (entregas en **`.architecture`** en el repo de app) |
+| [architecture/](architecture/README.md) | Arquitectura y diseño (entregas en **`.architecture/`** en el repo de app) |
 | [development/](development/README.md) | Desarrollo: [role-template](development/role-template.md), fullstack, perfiles **por tecnología** (React, Go, Flutter, Angular, Laravel, etc.) |
 | [testing/](testing/README.md) | QA: [role-template](testing/role-template.md), genérico, **pentester** (seguridad / CLI), **Jest móvil**, **Cypress web** |
 | **Seguridad** | Criterio y escenarios: [testing/pentester.md](testing/pentester.md); artefactos en **`.security/`** en el repo de producto (no hay carpeta `security/` de plantillas en la raíz). |
 | [management/](management/README.md) | **Technical Leader** (dueño **`.delivery-control/`**) y **PM** (solo **`.pmo/*.md`**); sin código |
 | [devops-iac/](devops-iac/README.md) | **DevOps engineer:** Terraform multinube, **GitHub Actions** por defecto, **`.iac/`** en el producto |
+
+## `agents-cli` e `install.sh` (sync desde GitHub)
+
+En la raíz del repo hay un **CLI en Bash** y un instalador para mantener los roles de Cursor **alineados con la última versión** publicada en GitHub (sin Azure DevOps ni `az`).
+
+| Recurso | Descripción |
+|--------|----------------|
+| [`agents-cli`](agents-cli) | Descarga Markdown desde [github.com/saturnodev/cursor-agents](https://github.com/saturnodev/cursor-agents) (rama por defecto **`main`**) usando la API de GitHub y `raw.githubusercontent.com`. Comandos: `init`, `list`, `pick` (requiere `fzf`), `add`, `remove`, `sync` (opción `--check` para detectar *drift*), `pin`, `banner`, `version`. |
+| [`install.sh`](install.sh) | Copia `agents-cli` a `~/.local/bin` (o `--prefix`). Opcional `--with-deps` (Homebrew) para `jq` / `fzf`. Variables: `SATURNODEV_LABS_AGENTS_PREFIX`, `SATURNODEV_LABS_AGENTS_BIN` (alias legacy `TMHUS_AGENTS_*`); `GITHUB_TOKEN` opcional para más cuota en `api.github.com`. |
+
+**Requisitos:** `curl` y `jq`. **Opcionales:** `fzf` (solo `pick`), `GITHUB_TOKEN`.
+
+Tras `init`, el CLI mantiene **`.cursor/agents/agents.lock.yml`**: ref de rama o *commit* (`pin`) y lista de rutas sincronizadas; `sync` vuelve a bajar solo esos ficheros.
+
+**Flujo típico en un repo de aplicación:** `agents-cli init` → `agents-cli list --ref main` para ver rutas (p. ej. `development/react/react-developer.md`) → `agents-cli pick` o `agents-cli add <ruta>...` → más adelante `agents-cli sync` para actualizar. Las opciones globales (`--ref`, `--dest`, `-q`) van **antes** del subcomando, p. ej. `agents-cli --ref main add development/fullstack-developer.md`.
+
+**Fork o mirror:** `SATURNODEV_GH_OWNER`, `SATURNODEV_GH_REPO`, `SATURNODEV_GH_API` si el remoto no es el público por defecto.
 
 ### Wiki y documentación (este repositorio)
 
@@ -56,10 +73,10 @@ En **Saturnodev Labs v2** el *Software Development Life Cycle* se organiza en **
 |------|--------|----------|
 | **1** | **Iniciativa comercial (análisis de requisitos)** | Asegurar **viabilidad de negocio y alcance**: captar y estructurar requisitos que alimenten la cadena de valor, antes o en paralelo con *discovery*. |
 | **2** | **Planeación** | Convertir requisitos en **plan** de trabajo, prioridades, *timeline*, capacidad y criterios de aceptación iniciales (sin sustituir el detallado de diseño). |
-| **3** | **Análisis y diseño** | **Detallar el backlog** (épicas, *features*, *stories* con criterios de aceptación) y producir el **diseño de arquitectura de software** y, en la misma etapa, el criterio de **UI/UX** (flujos, *wireframes* de referencia, lineamientos o prototipos) documentados para implementación, típicamente bajo **`.architecture`**. |
+| **3** | **Análisis y diseño** | **Detallar el backlog** (épicas, *features*, *stories* con criterios de aceptación) y producir el **diseño de arquitectura de software** y, en la misma etapa, el criterio de **UI/UX** (flujos, *wireframes* de referencia, lineamientos o prototipos) documentados para implementación, típicamente bajo **`.architecture/`**. |
 | **4** | **Desarrollo** | *Build* del producto: **vibe coding** y **spec driven** contra **`.architecture/`**, `docs/specs/story-*.md` (con pruebas unitarias obligatorias en el *spec*), historias planificadas en **`.delivery-control/`**. **Git** (`commit`/`push`) **solo** con aprobación del usuario; **pruebas unitarias al 100%** antes de *subir*; rama `story-*` desde `dev`; tras *push* aprobado, actualizar evidencia en la ficha de historia bajo **`.delivery-control/`** (ver [fullstack-developer](development/fullstack-developer.md)). |
 | **5** | **Pruebas** | *Validación* funcional, *regresión*, automatización y reporte de calidad de cara al *release* (bajo **`.testing/`**; planes e informes en **Markdown**; **bugs** elevados al TL en **`.delivery-control/`**). |
-| **6** | **Release** | Empaquetar, aprobar y desplegar a *staging/producción*: *pipelines*, *gates*, **`.iac`**, versionado y cierre *release* (o *rollout* controlado). |
+| **6** | **Release** | Empaquetar, aprobar y desplegar a *staging/producción*: *pipelines*, *gates*, **`.iac/`**, versionado y cierre *release* (o *rollout* controlado). |
 
 **Fase 7 (monitoreo y salud del proyecto):** no es un octavo *paso* consecutivo después de la 6. Es una **etiqueta** en el modelo **Saturnodev Labs v2** para **separar** el hilo *delivery* (fases 1 a 6) de la gobernanza y el **seguimiento continuo** (lectura de **`.delivery-control/`**, Git, CI, *health* de entrega). El agente [management/technical-leader.md](management/technical-leader.md) se documenta en **fase 7** con ese criterio; **en la práctica** el liderazgo técnico **cubre en paralelo** el proyecto (1 a 6 y más allá del *release*), sin que haya un solo momento “fase-7 *solo* al final”.
 
@@ -92,7 +109,7 @@ Cada `*.md` en **este** repositorio de plantillas fija *límites* y *entregables
 ```text
   (1) --> (2) --> (3) --> (4) --> (5) --> (6)     flujo principal, lectura LR (izquierda → derecha)
   1: Inic.   2: Plan.   3: A+D   4: Desa.   5: Pru.   6: Rel.
-  (3) análisis y diseño: backlog, arq, UI-UX.  (4) dev: spec driven, vibe.  (6) release: pipelines, .iac, despliegue.
+  (3) análisis y diseño: backlog, arq, UI-UX.  (4) dev: spec driven, vibe.  (6) release: pipelines, .iac/, despliegue.
 
   Detalle en vertical:
 
@@ -111,7 +128,7 @@ Cada `*.md` en **este** repositorio de plantillas fija *límites* y *entregables
   (5) Pruebas
         |
         v
-  (6) Release  --  pipelines, .iac, despliegue
+  (6) Release  --  pipelines, .iac/, despliegue
 
   (7) Monitoreo del proyecto  --  rol: technical-leader (fase 7 = etiqueta; vive en paralelo, no *después* de 6)
   Líder técnico:  ~~~>  1, 2, 3, 4, 5, 6  (+ fase 7 en documentación)   lectura/riesgo transversal; no *gate* obligatoria
@@ -121,7 +138,7 @@ Cada `*.md` en **este** repositorio de plantillas fija *límites* y *entregables
 
 ### Workflow operativo por fase (qué se hace, qué agente, qué se entrega)
 
-Orden lógico **1–6**; en **paralelo** a cualquier fase, **Líder técnico** ([management/technical-leader.md](management/technical-leader.md)). No todos los ciclos usan todos los roles a la vez: elegir plantillas según *stack* (p. ej. [development/react/](development/react/) o [testing/cypress/](testing/cypress/qa-cypress-web.md)).
+Orden lógico **1–6**; en **paralelo** a cualquier fase, **Líder técnico** ([management/technical-leader.md](management/technical-leader.md)). No todos los ciclos usan todos los roles a la vez: elegir plantillas según *stack* (p. ej. [react-developer](development/react/react-developer.md) o [qa-cypress-web](testing/cypress/qa-cypress-web.md)).
 
 | Fase | Qué hace el equipo (workflow) | Agente(s) (plantilla de referencia) | Entregables principales (esta fase) |
 |------|--------------------------------|--------------------------------------|-------------------------------------|
@@ -142,12 +159,12 @@ Según fase y producto, el flujo deja trazas en **repositorio** (Markdown en car
 - **[`.pmo/`](management/project-manager.md)** — *dashboard* e informes del PM (**solo `.md`**).
 - **[`.architecture/`](architecture/)** — diseño de arquitectura, TSD, lineamientos de *front*/*back*, ADR, diagramas **solo en texto** en *Markdown*; criterio de marca / UX (ver [software-architect](architecture/software-architect.md)).
 - **`docs/specs/story-*.md`** y **`docs/manual-tecnico.md`** / **`docs/manual-de-usuario.md`** (ver [fullstack-developer](development/fullstack-developer.md) y [qa-tester](testing/qa-tester.md)).
-- **Código de aplicación** (p. ej. `src/`, `app/`) — conforme a **`.architecture/`**; no *vive* en el repo de plantillas salvo copias bajo `.cursor/agents`.
+- **Código de aplicación** (p. ej. `src/`, `app/`) — conforme a **`.architecture/`**; no *vive* en **este** repo de plantillas (aquí solo hay Markdown de roles por categoría y documentación).
 - **[`.testing/`](testing/)** — *suites*, *fixtures*, *reports*, *config* en **Markdown** donde aplique narrativa (ver [qa-tester](testing/qa-tester.md)).
 - **[`.security/`](testing/pentester.md)** — escenarios e informes del [pentester](testing/pentester.md).
 - **[`.iac/`](devops-iac/)** — Terraform, módulos, `environments/`, *deployment plans* (ver [devops-engineer](devops-iac/devops-engineer.md)).
 - **Gobernanza (TL + PM)** — estado en **`.delivery-control/`** y **`.pmo/`**; lectura adicional de Git y CI según el rol.
-- **Plantilla mecánica de *Agentes* en Cursor** — *copies* de los `*.md` bajo [`.cursor/agents/`](.cursor/agents/README.md) en el producto, según *roles* elegidos.
+- **Agentes en Cursor (producto)** — *copias* de los `*.md` bajo **`.cursor/agents/`**, generadas con [`agents-cli`](agents-cli) o a mano desde las rutas de este repo (ver [docs/wiki-tmp/Cursor-agentes.md](docs/wiki-tmp/Cursor-agentes.md)).
 
 Más abajo, en **Cómo utilizarlo (flujo de trabajo con plantillas)**, se explica cómo **versionar** esas plantillas en vuestro repo de producto.
 
@@ -156,8 +173,8 @@ Más abajo, en **Cómo utilizarlo (flujo de trabajo con plantillas)**, se explic
 ## Cómo utilizarlo (flujo de trabajo con plantillas)
 
 1. **Clonar o añadir** este repositorio (submódulo, paquete interno, o copia) según el proceso acordado por **Saturnodev Labs v2**.
-2. Elegir **roles** según **fase** del SDLC (tabla de arriba) y *stack* del producto; abrís el `*.md` en la categoría adecuada.
-3. **Copiar** al repositorio del producto o a *plantillas aprobadas* y ajustar solo lo mínimo (enlaces, org, nombres de repo remoto).
+2. Elegir **roles** según **fase** del SDLC (tabla de arriba) y *stack* del producto; abrís el `*.md` en la categoría adecuada (`analysis/`, `development/`, etc.).
+3. **Llevar los roles al repo del producto:** copia manual de los `*.md` **o** instalar [`agents-cli`](agents-cli) con [`install.sh`](install.sh) y usar `init` / `add` / `pick` / `sync` contra [github.com/saturnodev/cursor-agents](https://github.com/saturnodev/cursor-agents) (público). Ajustar solo lo mínimo (enlaces, org, nombres de repo) cuando sea copia manual.
 4. **Versionar** con el código; **no** *mezclar* *roles* incompatibles en el mismo *@* salvo tarea *explícitamente* cruzada.
 5. Pauta **kebab-case** en nombres de fichero, alineada al campo `name` del *frontmatter*; leer los `README` por categoría y [development/role-template.md](development/role-template.md) / [testing/role-template.md](testing/role-template.md) al crear *roles* nuevos.
 
@@ -168,10 +185,11 @@ En el **repositorio con Cursor** (código de aplicación), dejad en la **raíz**
 ```text
 tu-proyecto/
 ├── .cursor/
-│   ├── agents/                 # copias de los que *este* producto invoca
-│   │   ├── fullstack-developer.md
-│   │   ├── react/
-│   │   │   └── react-developer.md
+│   ├── agents/                 # copias de los que *este* producto invoca (p. ej. vía agents-cli)
+│   │   ├── development/
+│   │   │   ├── fullstack-developer.md
+│   │   │   └── react/
+│   │   │       └── react-developer.md
 │   │   ├── testing/
 │   │   │   └── pentester.md
 │   │   └── management/
@@ -182,17 +200,17 @@ tu-proyecto/
 └── ...
 ```
 
-- **Solo** los *roles* *necesarios*; estructura plana o por *subcarpetas* replicando la estructura de **este** repo de plantillas; criterio documentable en [`.cursor/agents/README.md`](.cursor/agents/README.md) en vuestro repo.
+- **Solo** los *roles* *necesarios*; estructura por *subcarpetas* alineada a **este** repo (`development/`, `testing/`, …) para mismas rutas que `agents-cli list`; criterio adicional en [docs/wiki-tmp/Cursor-agentes.md](docs/wiki-tmp/Cursor-agentes.md).
 - Uso: **@** y ruta, p. ej. **@.cursor/agents/development/react/react-developer.md**. Las **reglas** en `.cursor/rules` son *complementarias* (estilo, *globs*), no el sustituto de la definición del *rol*.
 - **Repos de producto:** arrancar **`.cursor/rules/*.mdc`** según la línea base del [software-architect](architecture/software-architect.md). El checklist **pre-commit** canónico (**`saturnodev-labs-v2-doc-sync-on-commit.mdc`**, **`alwaysApply: true`**) se **genera en cada repo de aplicación** copiando el bloque indicado en ese rol — **no** se versiona en **este** repositorio de plantillas.
 
-> La convención **`.cursor/agents`** forma parte de **Saturnodev Labs v2**; *versionar* en *git* para *@* estable. En *este* repo, [`.cursor/agents/README.md`](.cursor/agents/README.md) actúa de *plantilla*.
+> La convención **`.cursor/agents/`** en el **producto** forma parte de **Saturnodev Labs v2**; *versionar* en *git* para *@* estables. En **este** repo las fuentes canónicas de los roles están por **categoría** en la raíz (`development/`, `testing/`, …), no duplicadas bajo `.cursor/agents/`.
 
 ## Contribuir o actualizar plantillas
 
 1. Cambios con **branch/PR** y *review* (arquitectura o *chapter* de prácticas **Saturnodev Labs v2**).  
-2. *Roles* nuevos con la *plantilla* y *checklist* de la categoría.  
-3. Sincronizar luego *producto* o `.cursor/agents` con el *commit* aprobado.
+2. *Roles* nuevos con la *plantilla* y *checklist* de la categoría correspondiente.  
+3. Tras *merge* en `main`, los equipos pueden **actualizar** el `.cursor/agents/` del producto con `agents-cli sync` (misma ref que el *lockfile*) o copiando los ficheros afectados a mano.
 
 ## Referencia rápida: carpetas en el repositorio de producto
 
@@ -206,6 +224,7 @@ tu-proyecto/
 | **`.testing/`** | *Suites* QA, informes, planes locales | [testing/](testing/README.md) |
 | **`.security/`** | Escenarios y evidencia pentester | [pentester](testing/pentester.md) |
 | **`.analyst/`** | *Drafts* y requisitos; **`.analyst/approved/`** | [analysis/](analysis/README.md) |
+| **`.cursor/agents/`** | Roles de Cursor que el producto invoca (`@…`) | [docs/wiki-tmp/Cursor-agentes.md](docs/wiki-tmp/Cursor-agentes.md), [`agents-cli`](agents-cli) |
 
 ## Licencia y uso
 

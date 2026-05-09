@@ -2,7 +2,7 @@
 
 Cada `*.md` en el repositorio de **plantillas Saturnodev Labs v2** fija *límites* (carpetas que tocan o no) y *entregables*. **Principal** = uso más frecuente. **Transversal** = lectura, riesgo o gobierno en varias fases.
 
-[Volver al inicio](/Home)
+[Volver al inicio](Home.md)
 
 Rutas en el repo de plantillas (relativas a la raíz): `analysis/`, `architecture/`, `development/`, `testing/`, `management/`, `devops-iac/`.
 
@@ -53,4 +53,4 @@ Más detalle: `README.md` en la raíz del repositorio de plantillas, sección *W
 
 ---
 
-## [Artefactos](/Artefactos) · [Uso en Cursor](/Cursor-agentes)
+## [Artefactos](Artefactos.md) · [Uso en Cursor](Cursor-agentes.md)

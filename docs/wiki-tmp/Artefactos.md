@@ -2,7 +2,7 @@
 
 Cada *rol* escribe bajo **carpetas de trabajo** acordadas. En el repositorio de **plantillas** solo hay los `*.md` de los agentes; en el **repositorio de la aplicación** viven las carpetas reales.
 
-[Volver al inicio](/Home)
+[Volver al inicio](Home.md)
 
 ---
 
@@ -22,7 +22,7 @@ Cada *rol* escribe bajo **carpetas de trabajo** acordadas. En el repositorio de 
 | **`.security/`** | Escenarios e informes del pentester | [pentester](../../testing/pentester.md) |
 | **`.iac/`** | Terraform, `modules/`, `environments/` | [devops-engineer](../../devops-iac/devops-engineer.md) |
 | **Código** (`src/`, `app/`, …) | Implementación | *fullstack* o especialista |
-| **`.cursor/agents/`** | Copias *versionadas* de los roles que el producto invoca | [Cursor-agentes](/Cursor-agentes) |
+| **`.cursor/agents/`** | Copias *versionadas* de los roles que el producto invoca (manual o **`agents-cli`**) | [Cursor-agentes](Cursor-agentes.md) |
 
 ---
 
@@ -32,4 +32,4 @@ Cada *rol* escribe bajo **carpetas de trabajo** acordadas. En el repositorio de 
 - **Control de cambios de alcance:** analista documenta → aprobación explícita → TL asigna sprint / modo de ataque.
 - **Documentación narrativa generada por agentes:** preferentemente **Markdown (`.md`)** en `docs/`, `.pmo/`, `.delivery-control/`, `.testing/`, `.security/`.
 
-## [Roles por fase](/Roles-y-fases)
+## [Roles por fase](Roles-y-fases.md)

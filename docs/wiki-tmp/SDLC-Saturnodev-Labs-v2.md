@@ -2,7 +2,7 @@
 
 En **Saturnodev Labs v2** el ciclo de vida se organiza en **seis fases de *delivery***; el modelo de agentes añade la **fase 7 (monitoreo)** para ubicar al *Technical Leader* **sin** confundirlo con un octavo paso obligatorio **después** de la 6. Las fases 1–6 pueden repetirse o solaparse en ciclos ágiles.
 
-[Volver al inicio](/Home)
+[Volver al inicio](Home.md)
 
 ---
 
@@ -47,5 +47,6 @@ Texto estructurado (sin Mermaid) como en el repositorio:
 
 ## Enlaces útiles
 
-- [Roles por fase](/Roles-y-fases)
-- Repositorio: `README.md` (tabla ampliada y notas de *spec* en fase 4)
+- [Roles por fase](Roles-y-fases.md)
+- [Cursor / agentes](Cursor-agentes.md)
+- Repositorio: `README.md` en la raíz (tabla ampliada, *agents-cli* y notas de *spec* en fase 4)
