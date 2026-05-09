@@ -46,7 +46,7 @@ En la raíz del repo hay un **CLI en Bash** y un instalador para mantener los ro
 | Recurso | Descripción |
 |--------|----------------|
 | [`agents-cli`](agents-cli) | Descarga Markdown desde [github.com/saturnodev/cursor-agents](https://github.com/saturnodev/cursor-agents) (rama por defecto **`main`**) usando la API de GitHub y `raw.githubusercontent.com`. Comandos: `init`, `list`, `pick` (requiere `fzf`), `add`, `remove`, `sync` (opción `--check` para detectar *drift*), `pin`, `banner`, `version`. |
-| [`install.sh`](install.sh) | Copia `agents-cli` a `~/.local/bin` (o `--prefix`). Opcional `--with-deps` (Homebrew) para `jq` / `fzf`. Variables: `SATURNODEV_LABS_AGENTS_PREFIX`, `SATURNODEV_LABS_AGENTS_BIN` (alias legacy `TMHUS_AGENTS_*`); `GITHUB_TOKEN` opcional para más cuota en `api.github.com`. |
+| [`install.sh`](install.sh) | Copia `agents-cli` a `~/.local/bin` (o `--prefix`). Añade **PREFIX** al **PATH** en `~/.zshrc` (y bash/fish si aplica) de forma **idempotente**. Tras instalar, debes **cerrar y abrir la terminal** o **`source ~/.zshrc`** (el script lo recuerda): el proceso del instalador no modifica el PATH de la ventana actual. `--no-shell-update` desactiva los cambios en los perfiles. Opcional `--with-deps` (Homebrew) para `jq` / `fzf`. Variables: `SATURNODEV_LABS_AGENTS_PREFIX`, `SATURNODEV_LABS_AGENTS_BIN` (alias legacy `TMHUS_AGENTS_*`); `GITHUB_TOKEN` opcional. |
 
 **Requisitos:** `curl` y `jq`. **Opcionales:** `fzf` (solo `pick`), `GITHUB_TOKEN`.
 
